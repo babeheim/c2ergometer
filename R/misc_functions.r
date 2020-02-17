@@ -83,9 +83,6 @@ read_pm5 <- function(data) {
   workouts$Time <- time_to_seconds(workouts$Time)
   splits$Time.1 <- time_to_seconds(splits$Time.1)
 
-  # there wasn't enough time in this split to calculate an spm
-  splits$SPM[splits$SPM == "0"] <- NA
-
   workouts$workout_type <- "Fixed Time"
   workouts$workout_type[grep("m", workouts$`Workout Name`)] <- "Fixed Distance"
   workouts$workout_type[grep("v", workouts$`Workout Name`)] <- "Complex"
@@ -97,7 +94,8 @@ read_pm5 <- function(data) {
     workout_type = workout_type,
     time = Time,
     distance = Meters,
-    spm = `Avg.SPM`
+    spm = `Avg.SPM`,
+    heart_rate = Avg.Heart.Rate
   )
 
   splits <- dplyr::select(splits,
@@ -105,8 +103,14 @@ read_pm5 <- function(data) {
     time_of_day = Time.of.Day,
     time = Time.1,
     distance = Meters.1,
-    spm = `SPM`
+    spm = `SPM`,
+    heart_rate = Heart.Rate
   )
+
+  # there wasn't enough time in this split to calculate an spm
+  splits$spm[splits$spm == "0"] <- NA
+  splits$heart_rate[splits$heart_rate == "0"] <- NA
+  workouts$heart_rate[workouts$heart_rate == "0"] <- NA
 
   workouts$spm <- as.numeric(workouts$spm)
   splits$spm <- as.numeric(splits$spm)
