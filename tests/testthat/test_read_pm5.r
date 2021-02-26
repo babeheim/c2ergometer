@@ -22,31 +22,13 @@ test_that("every file loads", {
 test_that("can create a database", {
 
   my_files <- list.files("raw-data", full.names = TRUE)
-  for (i in 1:length(my_files)) {
-    d <- read_pm5(my_files[i])
-    if (i == 1) {
-      workouts <- d$workouts
-      splits <- d$splits
-    } else {
 
-      existing_entries <- paste(workouts$date, workouts$time_of_day)
+  db <- create_pm5_database(my_files)
 
-      workout_candidates <- paste(d$workouts$date, d$workouts$time_of_day)
-      drop <- which(workout_candidates %in% existing_entries)
-      if (length(drop) > 0) d$workouts <- d$workouts[-drop,]
-      split_candidates <-  paste(d$split$date, d$split$time_of_day)
-      drop <- which(split_candidates %in% existing_entries)
-      if (length(drop) > 0) d$workouts <- d$workouts[-drop,]
-
-      if (nrow(d$workouts) > 0) workouts <- bind_rows(workouts, d$workouts)
-      if (nrow(d$splits) > 0)splits <- bind_rows(splits, d$splits)
-    }
-  }
-
-  workout_key <- paste(workouts$date, workouts$time_of_day)
+  workout_key <- paste(db$workouts$date, db$workouts$time_of_day)
   expect_true(!any(duplicated(workout_key)))
 
-  splits_key <- paste(splits$date, splits$time_of_day)
+  splits_key <- paste(db$splits$date, db$splits$time_of_day)
   expect_true(all(splits_key %in% workout_key))
 
 })

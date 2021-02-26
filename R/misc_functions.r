@@ -48,6 +48,9 @@ read_pm5 <- function(data) {
   if (c2u_version == "Concept2 Utility - Version 7.05.3") {
     raw_data <- read.csv(data, skip = 4, stringsAsFactors = FALSE, header = TRUE, sep = ",")
   }
+  if (c2u_version == "Concept2 Utility - Version 7.09.00") {
+    raw_data <- read.csv(data, skip = 3, stringsAsFactors = FALSE, header = TRUE, sep = ",")
+  }
 
   drop <- which(raw_data$Date == "")
   if (length(drop) > 0) raw_data <- raw_data[-drop, ]
@@ -84,8 +87,8 @@ read_pm5 <- function(data) {
   splits$Time.1 <- time_to_seconds(splits$Time.1)
 
   workouts$workout_type <- "Fixed Time"
-  workouts$workout_type[grep("m", workouts$`Workout Name`)] <- "Fixed Distance"
-  workouts$workout_type[grep("v", workouts$`Workout Name`)] <- "Complex"
+  workouts$workout_type[grep("m", workouts$`Workout.Name`)] <- "Fixed Distance"
+  workouts$workout_type[grep("v", workouts$`Workout.Name`)] <- "Complex"
   workouts$workout_type[which(workouts$workout_type == "Fixed Time" & workouts$Time < 6 * 60)] <- "Warmup"
 
   workouts <- dplyr::select(workouts,
@@ -94,7 +97,7 @@ read_pm5 <- function(data) {
     workout_type = workout_type,
     time = Time,
     distance = Meters,
-    spm = `Avg.SPM`,
+    stroke_rate = `Avg.SPM`,
     heart_rate = Avg.Heart.Rate
   )
 
@@ -103,17 +106,17 @@ read_pm5 <- function(data) {
     time_of_day = Time.of.Day,
     time = Time.1,
     distance = Meters.1,
-    spm = `SPM`,
+    stroke_rate = `SPM`,
     heart_rate = Heart.Rate
   )
 
   # there wasn't enough time in this split to calculate an spm
-  splits$spm[splits$spm == "0"] <- NA
+  splits$stroke_rate[splits$stroke_rate == "0"] <- NA
   splits$heart_rate[splits$heart_rate == "0"] <- NA
   workouts$heart_rate[workouts$heart_rate == "0"] <- NA
 
-  workouts$spm <- as.numeric(workouts$spm)
-  splits$spm <- as.numeric(splits$spm)
+  workouts$stroke_rate <- as.numeric(workouts$stroke_rate)
+  splits$stroke_rate <- as.numeric(splits$stroke_rate)
 
   workouts$distance <- as.numeric(workouts$distance)
   splits$distance <- as.numeric(splits$distance)
@@ -144,4 +147,27 @@ read_pm5 <- function(data) {
 
   return(out)
 
+}
+
+create_pm5_database <- function(files) {
+  # load a set of csvs and combine
+  for (i in 1:length(files)) {
+    d <- read_pm5(files[i])
+    if (i == 1) {
+      workouts <- d$workouts
+      splits <- d$splits
+    } else {
+      existing_entries <- paste(workouts$date, workouts$time_of_day)
+      workout_candidates <- paste(d$workouts$date, d$workouts$time_of_day)
+      drop <- which(workout_candidates %in% existing_entries)
+      if (length(drop) > 0) d$workouts <- d$workouts[-drop,]
+      split_candidates <-  paste(d$split$date, d$split$time_of_day)
+      drop <- which(split_candidates %in% existing_entries)
+      if (length(drop) > 0) d$splits <- d$splits[-drop,]
+      if (nrow(d$workouts) > 0) workouts <- bind_rows(workouts, d$workouts)
+      if (nrow(d$splits) > 0)splits <- bind_rows(splits, d$splits)
+    }
+  }
+  out <- list(workouts = workouts, splits = splits)
+  return(out)
 }
