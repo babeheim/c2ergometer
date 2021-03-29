@@ -51,6 +51,9 @@ read_pm5 <- function(data) {
   if (c2u_version == "Concept2 Utility - Version 7.09.00") {
     raw_data <- read.csv(data, skip = 3, stringsAsFactors = FALSE, header = TRUE, sep = ",")
   }
+  if (c2u_version == "Concept2 Utility - Version 7.10.01") {
+    raw_data <- read.csv(data, skip = 3, stringsAsFactors = FALSE, header = TRUE, sep = ",")
+  }
 
   drop <- which(raw_data$Date == "")
   if (length(drop) > 0) raw_data <- raw_data[-drop, ]
