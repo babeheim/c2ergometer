@@ -8,7 +8,7 @@ An R package for parsing CSV plaintext files output by the Concept2 PM5 Performa
 
 # Versions Supported
 
-This software loads output from the PM5 Performance Monitor, specifically version `6.97`, `7.05.3`, `7.09` and above.
+This software loads CSV plaintext Logbook files downloaded from the PM5 Performance Monitor using the [Concept2 Utility](https://www.concept2.com/service/software) software. I have tested it using Logbook Versions `6.97`, `7.05.3`, `7.09` and above.
 
 # Instructions
 
