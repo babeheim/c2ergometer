@@ -1,10 +1,10 @@
 # c2ergometer
 
-An R package for parsing CSV plaintext files output by the Concept2 ergometer into a longitudinal, relational database.
+An R package for parsing CSV plaintext files output by the Concept2 PM5 Performance Monitor into a longitudinal, relational database.
 
-*This project is for personal, non-commercial use and is not affiliated with Concept2, Inc.* [![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+*This package is for personal, non-commercial use and is not affiliated with Concept2, Inc.* This code is maintained by Bret Beheim and licensed under Creative Commons [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). See LICENSE.md for details.
 
-This code is maintained by Bret Beheim and licensed under Creative Commons [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). See LICENSE.md for details.
+[![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 # Versions Supported
 
