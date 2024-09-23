@@ -41,17 +41,13 @@ read_pm5 <- function(data) {
 
   c2u_version <- readLines(data)[1]
   c2u_version <- gsub(",", "", c2u_version)
+  c2u_version <- gsub("Concept2 Utility - Version ", "", c2u_version)
 
-  if (c2u_version == "Concept2 Utility - Version 6.97") {
+  if (c2u_version == "6.97") {
     raw_data <- read.csv(data, skip = 5, stringsAsFactors = FALSE, header = TRUE, sep = ",")
-  }
-  if (c2u_version == "Concept2 Utility - Version 7.05.3") {
+  } else if (c2u_version == "7.05.3") {
     raw_data <- read.csv(data, skip = 4, stringsAsFactors = FALSE, header = TRUE, sep = ",")
-  }
-  if (c2u_version == "Concept2 Utility - Version 7.09.00") {
-    raw_data <- read.csv(data, skip = 3, stringsAsFactors = FALSE, header = TRUE, sep = ",")
-  }
-  if (c2u_version == "Concept2 Utility - Version 7.10.01") {
+  } else {
     raw_data <- read.csv(data, skip = 3, stringsAsFactors = FALSE, header = TRUE, sep = ",")
   }
 
@@ -59,13 +55,15 @@ read_pm5 <- function(data) {
   if (length(drop) > 0) raw_data <- raw_data[-drop, ]
 
   year_code <- nchar(strsplit(raw_data$Date[1], "/")[[1]][3])
-  raw_data$Time.of.Day %>% strptime("%H:%M") %>% format("%H:%M") -> raw_data$Time.of.Day
-
-  if (year_code == 2) {
+  if (!is.na(year_code) & year_code == 2) {
     raw_data$Date <- as.Date(raw_data$Date, "%m/%d/%y")
-  } else if (year_code == 4) {
+  } else if (!is.na(year_code) & year_code == 4) {
     raw_data$Date <- as.Date(raw_data$Date, "%m/%d/%Y")
+  } else {
+    raw_data$Date <- as.Date(raw_data$Date)
   }
+
+  raw_data$Time.of.Day %>% strptime("%H:%M") %>% format("%H:%M") -> raw_data$Time.of.Day
 
   name_present <- colnames(raw_data)[1] == "Name"
 
@@ -168,7 +166,7 @@ create_pm5_database <- function(files) {
       drop <- which(split_candidates %in% existing_entries)
       if (length(drop) > 0) d$splits <- d$splits[-drop,]
       if (nrow(d$workouts) > 0) workouts <- bind_rows(workouts, d$workouts)
-      if (nrow(d$splits) > 0)splits <- bind_rows(splits, d$splits)
+      if (nrow(d$splits) > 0) splits <- bind_rows(splits, d$splits)
     }
   }
   out <- list(workouts = workouts, splits = splits)
